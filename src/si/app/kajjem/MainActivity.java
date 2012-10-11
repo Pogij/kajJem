@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -55,6 +56,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Bitmap photo;
 	private ImageView iv;
 	private TextView tv;
+	private ListView lv;
 
 
 
@@ -69,6 +71,7 @@ public class MainActivity extends Activity implements OnClickListener {
         setContentView(R.layout.activity_main);
         
         tv = (TextView)this.findViewById(R.id.textView1);
+        lv = (ListView)this.findViewById(R.id.content_list);
         
         this.photo = null;
         this.iv = (ImageView)this.findViewById(R.id.iv);
