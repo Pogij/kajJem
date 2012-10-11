@@ -1,0 +1,11 @@
+<resources>
+	
+    <string name="app_name">KajJem</string>
+    <string name="menu_settings">Nastavitve</string>
+    <string name="title_activity_main">KajJem</string>
+    <string name="takePicture">Zajem etikete</string>
+    <string name="instruction">Slikajte etiketo z vsebino živila.</string>
+	<string name="imageDescription">Slika etikete vsebine živila.</string>
+	<string name="performQueryButton">Poizvedi po snoveh</string>
+    
+</resources>
