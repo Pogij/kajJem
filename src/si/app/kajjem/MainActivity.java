@@ -25,10 +25,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -55,11 +55,13 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int CAMERA_REQUEST = 1;	//random number >= 0 which is returned when activity exits. 
 	private Bitmap photo;
 	private ImageView iv;
-	private TextView tv;
 	private ListView lv;
 
+    private ArrayList<String> contents_list; /* Items are stored in this ArrayList variable. */
+    private ArrayAdapter<String> contents_adapter; /* ArrayAdapter for setting items to ListView. */
 
-
+    
+    
 	/**
 	 * Function onCreate is called when the application is started.
 	 * 
@@ -70,7 +72,6 @@ public class MainActivity extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        tv = (TextView)this.findViewById(R.id.textView1);
         lv = (ListView)this.findViewById(R.id.content_list);
         
         this.photo = null;
@@ -100,6 +101,10 @@ public class MainActivity extends Activity implements OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {  
         if (requestCode == CAMERA_REQUEST) {
         	if (resultCode == RESULT_OK) {
+        		this.contents_list = new ArrayList<String>();
+        		this.contents_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contents_list);
+        		this.lv.setAdapter(this.contents_adapter);
+        		
 	            this.photo = (Bitmap) data.getExtras().get("data"); 
 	            iv.setImageBitmap(photo);
 	            final Button b_performQuery = (Button) this.findViewById(R.id.b_performQuery);
@@ -293,7 +298,10 @@ public class MainActivity extends Activity implements OnClickListener {
 				return;
 			}
 			
-			tv.setText(items.get(0).itemName + "\n" + items.get(1).itemName);
+			for (int i = 0 ; i < items.size() ; i++) {
+				contents_list.add(items.get(i).itemName + "\n" + items.get(i).description + "\n" + items.get(i).healthImpact);
+                contents_adapter.notifyDataSetChanged();
+			}
         }
 	}
 	
