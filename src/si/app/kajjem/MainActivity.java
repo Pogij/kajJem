@@ -17,6 +17,8 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
+import si.custom.widgets.SemiClosedSlidingDrawer;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -101,6 +103,7 @@ public class MainActivity extends Activity implements OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {  
         if (requestCode == CAMERA_REQUEST) {
         	if (resultCode == RESULT_OK) {
+        		/* Prepares all necessary variables to fill listView with new data. */
         		this.contents_list = new ArrayList<String>();
         		this.contents_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contents_list);
         		this.lv.setAdapter(this.contents_adapter);
@@ -298,16 +301,21 @@ public class MainActivity extends Activity implements OnClickListener {
 				return;
 			}
 			
+			contents_list.clear();
 			for (int i = 0 ; i < items.size() ; i++) {
 				contents_list.add(items.get(i).itemName + "\n" + items.get(i).description + "\n" + items.get(i).healthImpact);
-                contents_adapter.notifyDataSetChanged();
 			}
+			contents_adapter.notifyDataSetChanged();
+			
+			/* Bottom two commands are necessary to show contents of sliding drawer right away (without sliding drawer being opened). */
+			final SemiClosedSlidingDrawer scsd = (SemiClosedSlidingDrawer) findViewById(R.id.list_sliding_drawer);
+			scsd.closeDrawer();
         }
 	}
 	
 	
 	
-	
+
 	
 	
 	/**

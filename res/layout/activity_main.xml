@@ -42,13 +42,18 @@ android:layout_height="wrap_content" >
 
     </LinearLayout>
 
-    <SlidingDrawer
-        android:id="@+id/slidingDrawer1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:content="@+id/content_list"
-        android:handle="@+id/drawer_button"
-        android:visibility="visible" >
+    <si.custom.widgets.SemiClosedSlidingDrawer 
+    xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:custom="http://schemas.android.com/apk/res/si.app.kajjem"
+    android:id="@+id/list_sliding_drawer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    custom:orientation="vertical"
+    custom:handle="@+id/drawer_button"
+    custom:content="@+id/content_list"
+    custom:allowSingleTap="true"
+    custom:semiClosedContentSize="240dp"
+    >
         
         <TextView
             android:id="@+id/drawer_button" 
@@ -63,9 +68,8 @@ android:layout_height="wrap_content" >
             android:id="@+id/content_list"
             android:background="#000000" >
         </ListView>
-
-
-    </SlidingDrawer>
+        
+	</si.custom.widgets.SemiClosedSlidingDrawer>        
 
 </FrameLayout>
 
