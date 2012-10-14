@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -17,8 +16,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
+import si.app.data.classes.Item;
+import si.custom.widgets.ColorfulAdapter;
 import si.custom.widgets.SemiClosedSlidingDrawer;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -58,9 +57,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Bitmap photo;
 	private ImageView iv;
 	private ListView lv;
+	private SemiClosedSlidingDrawer scsd;
 
-    private ArrayList<String> contents_list; /* Items are stored in this ArrayList variable. */
-    private ArrayAdapter<String> contents_adapter; /* ArrayAdapter for setting items to ListView. */
+	private ArrayList<Item> items; /* Items are stored in this ArrayList variable. */
+    private ColorfulAdapter items_adapter; /* ArrayAdapter for setting items to ListView. */
 
     
     
@@ -74,7 +74,10 @@ public class MainActivity extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        lv = (ListView)this.findViewById(R.id.content_list);
+        this.items = null;
+        
+        this.lv = (ListView)this.findViewById(R.id.content_list);
+        this.scsd = (SemiClosedSlidingDrawer) findViewById(R.id.list_sliding_drawer);
         
         this.photo = null;
         this.iv = (ImageView)this.findViewById(R.id.iv);
@@ -92,7 +95,6 @@ public class MainActivity extends Activity implements OnClickListener {
         final Button b_performQuery = (Button) this.findViewById(R.id.b_performQuery);
         b_performQuery.setOnClickListener(this);
         b_performQuery.setEnabled(false);
-
     }
     
     
@@ -103,13 +105,16 @@ public class MainActivity extends Activity implements OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {  
         if (requestCode == CAMERA_REQUEST) {
         	if (resultCode == RESULT_OK) {
+        		
         		/* Prepares all necessary variables to fill listView with new data. */
-        		this.contents_list = new ArrayList<String>();
-        		this.contents_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contents_list);
-        		this.lv.setAdapter(this.contents_adapter);
+        		items = new ArrayList<Item>();
+        		this.items_adapter = new ColorfulAdapter(this, R.layout.listview_row, items);
+        		this.lv.setAdapter(this.items_adapter);
+        		
         		
 	            this.photo = (Bitmap) data.getExtras().get("data"); 
 	            iv.setImageBitmap(photo);
+	            //final Button b_performQuery = (Button) this.findViewById(R.id.b_performQuery);
 	            final Button b_performQuery = (Button) this.findViewById(R.id.b_performQuery);
 	            b_performQuery.setEnabled(true);
         	}
@@ -231,7 +236,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	 * @author Matevž Pogačar
 	 *
 	 */
-	protected class PerformQuery extends AsyncTask<String, Void, List<Item>> {
+	protected class PerformQuery extends AsyncTask<String, Void, Void> {
 
 		
 		/**
@@ -240,11 +245,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		 * This method overrides existing method in AsyncTask class.
 		 */
 		@Override
-		protected List<Item> doInBackground(String... params) {
+		protected Void doInBackground(String... params) {
 			String url = params[0];
 			String jsonData = params[1];
-			
-			List<Item> items = null;
 			
 			HttpPost post = new HttpPost();
 			post.setHeader("Accept", "application/json; charset=UTF-8");
@@ -286,7 +289,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				e.printStackTrace();
 			}
 			
-			return items;
+			return null;
 		}
 		
 
@@ -296,39 +299,16 @@ public class MainActivity extends Activity implements OnClickListener {
 		 * 
 		 * This method overrides existing method in AsyncTask class.
 		 */
-		protected void onPostExecute(List<Item> items) {
-			if (items == null) {
-				return;
-			}
+		protected void onPostExecute(Void none) {
 			
-			contents_list.clear();
-			for (int i = 0 ; i < items.size() ; i++) {
-				contents_list.add(items.get(i).itemName + "\n" + items.get(i).description + "\n" + items.get(i).healthImpact);
-			}
-			contents_adapter.notifyDataSetChanged();
+			items_adapter.clear();
+			items_adapter.addAll(items);
+			items_adapter.notifyDataSetChanged();
 			
-			/* Bottom two commands are necessary to show contents of sliding drawer right away (without sliding drawer being opened). */
-			final SemiClosedSlidingDrawer scsd = (SemiClosedSlidingDrawer) findViewById(R.id.list_sliding_drawer);
+			/* Bottom command is necessary to show contents of sliding drawer right away (without sliding drawer being opened). */
 			scsd.closeDrawer();
         }
 	}
-	
-	
-	
-
-	
-	
-	/**
-	 * Class used to parse the data from string into a list.
-	 * @author Matevž Pogačar
-	 *
-	 */
-	public class Item {
-		private String itemName;
-		private String description;
-		private int healthImpact;
-	}
-	
 }
 
 
