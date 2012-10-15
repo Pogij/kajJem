@@ -1,8 +1,9 @@
+<!-- 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" >
  
-    <!--
+
     <ImageView
         android:id="@+id/row_image"
         android:layout_width="50px"
@@ -14,14 +15,34 @@
     </ImageView>
     
     -->
- 
-    <TextView
-	    xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/row_text"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:padding="10dp"
-		android:textSize="16sp" >
-	</TextView>
- 
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/row_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="4dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:textSize="16sp" />
+
+        <TextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/row_description"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:textSize="8sp" />
+
+    </LinearLayout>
+<!-- 
 </LinearLayout>
+-->

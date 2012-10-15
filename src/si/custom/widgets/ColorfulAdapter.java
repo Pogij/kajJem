@@ -61,15 +61,17 @@ public class ColorfulAdapter extends ArrayAdapter<Item> {
 		View rowView = inflater.inflate(R.layout.listview_row, parent, false);
 
 		//ImageView imageView = (ImageView) rowView.findViewById(R.id.row_image);
-		TextView textView = (TextView) rowView.findViewById(R.id.row_text);
+		TextView itemName = (TextView) rowView.findViewById(R.id.row_text);
+		TextView description = (TextView) rowView.findViewById(R.id.row_description);
 		
 		Item item = items.get(position);
-		textView.setText(item.getItemName());
+		itemName.setText(item.getItemName());
+		description.setText(item.getDescription());
 
 		if (item.getHealthImpact() > 5) {
-			textView.setBackgroundColor(Color.BLUE);
+			rowView.setBackgroundColor(Color.BLUE);
 		} else {
-			textView.setBackgroundColor(Color.RED);
+			rowView.setBackgroundColor(Color.RED);
 		}
  
 		return rowView;

@@ -1,4 +1,5 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
@@ -58,17 +59,16 @@
     </LinearLayout>
 
     <si.custom.widgets.SemiClosedSlidingDrawer 
-    xmlns:android="http://schemas.android.com/apk/res/android" 
-    xmlns:custom="http://schemas.android.com/apk/res/si.app.kajjem"
-    android:id="@+id/list_sliding_drawer"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    custom:orientation="vertical"
-    custom:handle="@+id/drawer_button"
-    custom:content="@+id/content_list"
-    custom:allowSingleTap="true"
-    custom:semiClosedContentSize="280dp"
-    >
+    	xmlns:android="http://schemas.android.com/apk/res/android" 
+    	xmlns:custom="http://schemas.android.com/apk/res/si.app.kajjem"
+    	android:id="@+id/list_sliding_drawer"
+    	android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	custom:orientation="vertical"
+    	custom:handle="@+id/drawer_button"
+    	custom:content="@+id/content_list"
+    	custom:allowSingleTap="true"
+    	custom:semiClosedContentSize="280dp" >
         
         <TextView
             android:id="@+id/drawer_button" 

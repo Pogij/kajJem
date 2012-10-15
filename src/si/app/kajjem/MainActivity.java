@@ -106,17 +106,16 @@ public class MainActivity extends Activity implements OnClickListener {
         if (requestCode == CAMERA_REQUEST) {
         	if (resultCode == RESULT_OK) {
         		
-        		/* Prepares all necessary variables to fill listView with new data. */
-        		items = new ArrayList<Item>();
-        		this.items_adapter = new ColorfulAdapter(this, R.layout.listview_row, items);
-        		this.lv.setAdapter(this.items_adapter);
-        		
-        		
-	            this.photo = (Bitmap) data.getExtras().get("data"); 
+        		this.photo = (Bitmap) data.getExtras().get("data"); 
 	            iv.setImageBitmap(photo);
-	            //final Button b_performQuery = (Button) this.findViewById(R.id.b_performQuery);
+        		
 	            final Button b_performQuery = (Button) this.findViewById(R.id.b_performQuery);
 	            b_performQuery.setEnabled(true);
+	            
+        		/* Prepares all necessary variables to fill listView with new data. */
+	            items = new ArrayList<Item>();
+        		this.items_adapter = new ColorfulAdapter(this, R.layout.listview_row, items);
+        		this.lv.setAdapter(this.items_adapter);
         	}
         }
     }
