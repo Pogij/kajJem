@@ -16,11 +16,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  *
  */
 public class DatabaseHandler extends SQLiteOpenHelper {
-
+	
 	
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "vsebina";
-	
+    private static final String DATABASE_NAME = "kajjem.db";
+    
+    
     
     /**
      * Class constructor.
@@ -38,19 +39,28 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		// TODO Auto-generated method stub
-		
+		db.execSQL("CREATE TABLE snov ( " +
+				   "id_snov INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+				   "naziv_snovi VARCHAR(50) NOT NULL, " +
+				   "opis VARCHAR(500) NOT NULL, " +
+				   "vpliv_zdravje INTEGER NOT NULL)");
+		db.execSQL("INSERT INTO snov (naziv_snovi, opis, vpliv_zdravje) VALUES ('snov 1', 'Prva lokalna snov', 200)");
+		db.execSQL("INSERT INTO snov (naziv_snovi, opis, vpliv_zdravje) VALUES ('snov 2', 'Druga lokalna snov', 133)");
 	}
+	
 
-	
-	
+
 	/**
 	 * Method onUpgrade takes care of database upgrades.
 	 */
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
-		
+		if (newVersion > oldVersion) {
+		    switch (oldVersion) {
+		        case 1:
+		            // IN CASE OF DATABASE UPGRADE.
+		    }
+		}
 	}
 
 }

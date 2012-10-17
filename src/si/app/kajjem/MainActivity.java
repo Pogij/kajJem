@@ -21,6 +21,8 @@ import si.custom.widgets.ColorfulAdapter;
 import si.custom.widgets.SemiClosedSlidingDrawer;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -61,6 +63,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private ArrayList<Item> items; /* Items are stored in this ArrayList variable. */
     private ColorfulAdapter items_adapter; /* ArrayAdapter for setting items to ListView. */
+    
+    private DatabaseHandler dbh;
 
     
     
@@ -95,6 +99,14 @@ public class MainActivity extends Activity implements OnClickListener {
         final Button b_performQuery = (Button) this.findViewById(R.id.b_performQuery);
         b_performQuery.setOnClickListener(this);
         b_performQuery.setEnabled(false);
+        
+        /* Prepares all necessary variables to fill listView with new data. */
+        this.items = new ArrayList<Item>();
+		this.items_adapter = new ColorfulAdapter(this, R.layout.listview_row, items);
+		this.lv.setAdapter(this.items_adapter);
+        
+		/* Prepares database access object. */
+        this.dbh = new DatabaseHandler(this);
     }
     
     
@@ -111,11 +123,6 @@ public class MainActivity extends Activity implements OnClickListener {
         		
 	            final Button b_performQuery = (Button) this.findViewById(R.id.b_performQuery);
 	            b_performQuery.setEnabled(true);
-	            
-        		/* Prepares all necessary variables to fill listView with new data. */
-	            items = new ArrayList<Item>();
-        		this.items_adapter = new ColorfulAdapter(this, R.layout.listview_row, items);
-        		this.lv.setAdapter(this.items_adapter);
         	}
         }
     }
@@ -205,6 +212,28 @@ public class MainActivity extends Activity implements OnClickListener {
 			MediaStore.Images.Media.insertImage(getContentResolver(),file.getAbsolutePath(),file.getName(),file.getName());
 			*/
 			
+			SQLiteDatabase qdb = dbh.getReadableDatabase();
+			String[] columns = new String[]{"naziv_snovi", "opis", "vpliv_zdravje"};
+			Cursor result = qdb.query("snov", columns, null, null, null, null, null);
+			
+			items = new ArrayList<Item>();
+			
+			if (result.moveToFirst() == true){
+				   do{
+					   String naziv = result.getString(result.getColumnIndex("naziv_snovi"));
+					   String opis = result.getString(result.getColumnIndex("opis"));
+					   int vpliv = result.getInt(result.getColumnIndex("vpliv_zdravje"));
+					   items.add(new Item(naziv, opis, vpliv));
+				   }while(result.moveToNext() == true);
+				}
+				result.close();
+
+			
+			/*
+			   GET THE REST OF THE ITEMS AND QUERY THE SERVER FOR THE DATA.
+			*/
+			
+			
 			sendDataJson.addProperty("webservice", "Get product contents");
 			return sendDataJson;
 		}
@@ -269,8 +298,6 @@ public class MainActivity extends Activity implements OnClickListener {
 				JsonElement jElement = new JsonParser().parse(receivedResult);
 				JsonArray jArray = jElement.getAsJsonArray();	 
 				Iterator<JsonElement> iterator = jArray.iterator();
-			
-				items = new ArrayList<Item>();
 				
 				/* Goes through all received items and parses them into List items. */
 				while(iterator.hasNext()){
@@ -299,6 +326,18 @@ public class MainActivity extends Activity implements OnClickListener {
 		 * This method overrides existing method in AsyncTask class.
 		 */
 		protected void onPostExecute(Void none) {
+
+			/* Sorts items from good impact on health (higher value) to bad (lower value). */
+			Item temp = null;
+			for (int i = 0 ; i < items.size() - 1 ; i++) {
+				for (int j = i ; j < items.size() ; j++) {
+					if (items.get(i).getHealthImpact() < items.get(j).getHealthImpact()) {
+						temp = items.get(i);
+						items.set(i, items.get(j));
+						items.set(j, temp);
+					}
+				}
+			}
 			
 			items_adapter.clear();
 			items_adapter.addAll(items);
@@ -306,6 +345,11 @@ public class MainActivity extends Activity implements OnClickListener {
 			
 			/* Bottom command is necessary to show contents of sliding drawer right away (without sliding drawer being opened). */
 			scsd.closeDrawer();
+			
+			
+			/*
+			   UPDATE THE DATABASE. 
+			 */
         }
 	}
 }

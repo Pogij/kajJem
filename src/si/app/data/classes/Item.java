@@ -12,6 +12,12 @@ public class Item {
 	
 	
 	
+	public Item(String itemName, String description, int healthImpact) {
+		this.itemName = itemName;
+		this.description = description;
+		this.healthImpact = healthImpact;
+	}
+	
 	public String getItemName() {
 		return itemName;
 	}
