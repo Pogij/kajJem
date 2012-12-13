@@ -39,13 +39,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("CREATE TABLE snov ( " +
-				   "id_snov INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-				   "naziv_snovi VARCHAR(50) NOT NULL, " +
-				   "opis VARCHAR(500) NOT NULL, " +
-				   "vpliv_zdravje INTEGER NOT NULL)");
-		db.execSQL("INSERT INTO snov (naziv_snovi, opis, vpliv_zdravje) VALUES ('snov 1', 'Prva lokalna snov', 200)");
-		db.execSQL("INSERT INTO snov (naziv_snovi, opis, vpliv_zdravje) VALUES ('snov 2', 'Druga lokalna snov', 133)");
+		db.execSQL("CREATE TABLE content ( " +
+				   "id_content INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+				   "content_name VARCHAR(50) NOT NULL, " +
+				   "content_description VARCHAR(500) NOT NULL, " +
+				   "health_impact INTEGER NOT NULL, " +
+				   "data_version INTEGER NOT NULL)");
+		db.execSQL("INSERT INTO content (content_name, content_description, health_impact, data_version) VALUES ('snov 1', 'Prva lokalna snov', 200, 1)");
+		db.execSQL("INSERT INTO content (content_name, content_description, health_impact, data_version) VALUES ('snov 2', 'Druga lokalna snov', 133, 1)");
 	}
 	
 

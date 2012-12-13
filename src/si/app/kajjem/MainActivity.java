@@ -38,7 +38,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import com.googlecode.tesseract.android.TessBaseAPI;
 
 
 
@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements OnClickListener {
         b_takePicture.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST); 
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
             }
         });
         
@@ -144,7 +144,7 @@ public class MainActivity extends Activity implements OnClickListener {
      * This method takes care of click function (it is present in this class because of 'implements' statement in the class definition).
      */
 	public void onClick(View view) {
-		new PerformOCR(view).execute();
+		new PerformOCR(view, this.photo).execute();
 	}
 	
 	
@@ -165,16 +165,17 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 		JsonObject sendDataJson;
 		View view;
-		
+		Bitmap photo;
 		
 		
 		/**
 		 * Constructor receives picture as a View parameter and creates an instance of JsonObject. 
 		 * @param view - Picture passed to the class.
 		 */
-		public PerformOCR(View view) {
+		public PerformOCR(View view, Bitmap photo) {
 			sendDataJson = new JsonObject();
 			this.view = view;
+			this.photo = photo;
 		}
 		
 		
@@ -187,46 +188,31 @@ public class MainActivity extends Activity implements OnClickListener {
 		@Override
 		protected JsonObject doInBackground(String... params) {
 			
-			//OCR ocr = new OCR();
-			/*
-			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			this.photo.compress(Bitmap.CompressFormat.PNG, 100, output);
-			byte[] bytes = output.toByteArray();
-			byte[] base64Image = Base64.encode(bytes, Base64.DEFAULT);
-			*/
-			//jsonImage.put("image", base64Image);
-			//JsonPrimitive jsp = new JsonPrimitive(Base64.encodeToString(bytes, Base64.NO_WRAP));
-			
-			
-			/*
-			String path = Environment.getExternalStorageDirectory().toString();
-			OutputStream fOut = null;
-			File file = new File(path, "tmp.png");
-			
-			
-			fOut = new FileOutputStream(file);
-			this.photo.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-			fOut.flush();
-			fOut.close();
+			String trainedDataDirectory ="/mnt/sdcard/";
+			TessBaseAPI tess_api = new TessBaseAPI();
+			tess_api.init(trainedDataDirectory, "eng");
+			tess_api.setImage(this.photo);
+			String text = tess_api.getUTF8Text();
 
-			MediaStore.Images.Media.insertImage(getContentResolver(),file.getAbsolutePath(),file.getName(),file.getName());
-			*/
+			tess_api.end();
 			
 			SQLiteDatabase qdb = dbh.getReadableDatabase();
-			String[] columns = new String[]{"naziv_snovi", "opis", "vpliv_zdravje"};
-			Cursor result = qdb.query("snov", columns, null, null, null, null, null);
+			Cursor result = qdb.rawQuery("SELECT content_name, content_description, health_impact, data_version FROM content ORDER BY health_impact DESC", null);
 			
 			items = new ArrayList<Item>();
 			
-			if (result.moveToFirst() == true){
-				   do{
-					   String naziv = result.getString(result.getColumnIndex("naziv_snovi"));
-					   String opis = result.getString(result.getColumnIndex("opis"));
-					   int vpliv = result.getInt(result.getColumnIndex("vpliv_zdravje"));
-					   items.add(new Item(naziv, opis, vpliv));
-				   }while(result.moveToNext() == true);
-				}
-				result.close();
+			items.add(new Item("OCR", text, 255, 1));
+			
+			if (result.moveToFirst() == true) {
+			   do {
+				   String name = result.getString(result.getColumnIndex("content_name"));
+				   String description = result.getString(result.getColumnIndex("content_description"));
+				   int healthImpact = result.getInt(result.getColumnIndex("health_impact"));
+				   int dataVersion = result.getInt(result.getColumnIndex("data_version"));
+				   items.add(new Item(name, description, healthImpact, dataVersion));
+			   } while(result.moveToNext() == true);
+			}
+			result.close();
 
 			
 			/*
@@ -248,6 +234,14 @@ public class MainActivity extends Activity implements OnClickListener {
 		protected void onPostExecute(JsonObject sendDataJson) {
 			String sendDataJsonString = sendDataJson.toString();
 			new PerformQuery().execute("http://193.95.242.213:8192/kajJemWebService/content", sendDataJsonString);
+			
+			/* Here we present all data we got from database. */
+			items_adapter.clear();
+			items_adapter.addAll(items);
+			items_adapter.notifyDataSetChanged();
+			/* Last command is necessary to show contents of sliding drawer right away. */
+			scsd.closeDrawer();
+			this.cancel(true);
         }
 	}
 	
@@ -300,11 +294,21 @@ public class MainActivity extends Activity implements OnClickListener {
 				Iterator<JsonElement> iterator = jArray.iterator();
 				
 				/* Goes through all received items and parses them into List items. */
+				/* It also writes new data into database. */
+				//SQLiteDatabase qdb = dbh.getWritableDatabase();
+				items = new ArrayList<Item>();
 				while(iterator.hasNext()){
 					JsonElement json2 = (JsonElement)iterator.next();
 					Gson gson = new Gson();
 					Item item = gson.fromJson(json2, Item.class);
 					items.add(item);
+					
+					/* Database insert. */
+					/*ContentValues insertValues = new ContentValues();
+					insertValues.put("naziv_snovi",item.getItemName());
+					insertValues.put("opis",item.getDescription());
+					insertValues.put("vpliv_zdravje",item.getHealthImpact());
+					qdb.insert("snov", null, insertValues);*/
 				}
 				
 			} catch (URISyntaxException e) {
@@ -326,30 +330,20 @@ public class MainActivity extends Activity implements OnClickListener {
 		 * This method overrides existing method in AsyncTask class.
 		 */
 		protected void onPostExecute(Void none) {
-
-			/* Sorts items from good impact on health (higher value) to bad (lower value). */
-			Item temp = null;
-			for (int i = 0 ; i < items.size() - 1 ; i++) {
-				for (int j = i ; j < items.size() ; j++) {
-					if (items.get(i).getHealthImpact() < items.get(j).getHealthImpact()) {
-						temp = items.get(i);
-						items.set(i, items.get(j));
-						items.set(j, temp);
+			
+			/* Here the application goes through all Internet received items and places them into position according to healthImpact value. */
+			for (int i = 0 ; i < items.size() ; i++) {
+				int j = 0;
+				for (j = 0 ; j < items_adapter.getCount() ; j++) {
+					if (items.get(i).getHealthImpact() > items_adapter.getItem(j).getHealthImpact()) {
+						break;
 					}
 				}
+				
+				items_adapter.insert(items.get(i), j);
+				items_adapter.notifyDataSetChanged();
 			}
-			
-			items_adapter.clear();
-			items_adapter.addAll(items);
-			items_adapter.notifyDataSetChanged();
-			
-			/* Bottom command is necessary to show contents of sliding drawer right away (without sliding drawer being opened). */
-			scsd.closeDrawer();
-			
-			
-			/*
-			   UPDATE THE DATABASE. 
-			 */
+			this.cancel(true);
         }
 	}
 }

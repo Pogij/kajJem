@@ -76,21 +76,23 @@ public class ColorfulAdapter extends ArrayAdapter<Item> {
 		 * 
 		 * Values between 0 and 127 and between 128 and 255 are calculated separately.
 		 */
+		String colorValue = null;
 		if (item.getHealthImpact() < 0) {
-			rowView.setBackgroundColor(0xFFFF4444);
+			colorValue = "#FFFF44";
 		} else if (item.getHealthImpact() > 255) {
-			rowView.setBackgroundColor(0xFF44FF44);
+			colorValue = "#44FF44";
 		} else {
 			if (item.getHealthImpact() < 128) {
 				int middle = (int) (68 + Math.round(item.getHealthImpact()*1.47));		// 68 + x * ((255 - 68) / 127)
-				String colorValue = "#FF" + Integer.toHexString(middle) + "44";
-				rowView.setBackgroundColor(Color.parseColor(colorValue));
+				colorValue = "#FF" + Integer.toHexString(middle) + "44";
 			} else {
 				int beginning = (int) (Math.round(443.24 - item.getHealthImpact()*1.47));	// 255 - ((x - 128) / ((255 - 128) / (255 - 68)) = 255 - ((x - 128) / 0.68)
-				String colorValue = "#" + Integer.toHexString(beginning) + "FF44";
-				rowView.setBackgroundColor(Color.parseColor(colorValue));
+				colorValue = "#" + Integer.toHexString(beginning) + "FF44";
 			}
 		}
+		
+		itemName.setBackgroundColor(Color.parseColor(colorValue));
+		description.setBackgroundColor(Color.parseColor(colorValue));
  
 		return rowView;
 	}
